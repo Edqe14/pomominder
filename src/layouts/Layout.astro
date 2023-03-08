@@ -1,0 +1,63 @@
+---
+import "@fontsource/inter";
+
+export interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<main class="w-screen h-screen bg-red-500 transition-colors duration-300 ease-in-out grid place-items-center text-white font-inter">
+			<slot />
+		</main>
+	</body>
+</html>
+
+<script>
+import { useStore, Store } from '../lib/store';
+
+// Background updater
+const Colors = {
+	work: 'bg-pale-red',
+	shortBreak: 'bg-pale-teal',
+	longBreak: 'bg-pale-blue'
+} as const;
+
+const main = document.querySelector('main')!;
+const update = (state: Store) => {
+	const removeList = [...Object.values(Colors)];
+
+	switch(state.mode) {
+		case 'work':
+			removeList.splice(removeList.indexOf(Colors.work), 1);
+			main.classList.add(Colors.work);
+			break;
+
+		case 'shortBreak':
+			removeList.splice(removeList.indexOf(Colors.shortBreak), 1);
+			main.classList.add(Colors.shortBreak);
+			break;
+
+		case 'longBreak':
+			removeList.splice(removeList.indexOf(Colors.longBreak), 1);
+			main.classList.add(Colors.longBreak);
+			break;
+	}
+
+	main.classList.remove(...removeList);
+}
+
+update(useStore.getState());
+useStore.subscribe(update);
+</script>

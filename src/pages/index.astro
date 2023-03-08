@@ -1,0 +1,16 @@
+---
+import { ModeSelector } from '../components/ModeSelector';
+import { Timer } from '../components/Timer';
+import { Toggle } from '../components/Toggle';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Pomominder">
+	<section class="flex flex-col items-center gap-8">
+		<ModeSelector client:load />
+
+		<Timer client:load />
+
+		<Toggle client:load />
+	</section>
+</Layout>
