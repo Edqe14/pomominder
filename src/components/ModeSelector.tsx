@@ -12,7 +12,7 @@ export const ModeSelector = () => {
   return (
     <section
       className={`flex gap-4 transition-opacity duration-300 ease-in-out ${
-        state === 'running' ? 'opacity-0' : ''
+        state === 'running' ? 'opacity-0 pointer-events-none' : ''
       }`}
     >
       <Button active={mode === 'work'} onClick={() => setMode('work')}>

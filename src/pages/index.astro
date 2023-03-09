@@ -1,5 +1,6 @@
 ---
 import { ModeSelector } from '../components/ModeSelector';
+import { SettingsModal } from '../components/SettingsModal';
 import { Timer } from '../components/Timer';
 import { Toggle } from '../components/Toggle';
 import Layout from '../layouts/Layout.astro';
@@ -12,5 +13,7 @@ import Layout from '../layouts/Layout.astro';
 		<Timer client:load />
 
 		<Toggle client:load />
+
+		<SettingsModal client:load />
 	</section>
 </Layout>

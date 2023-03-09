@@ -1,5 +1,6 @@
 import {
   ArrowCircleLeft,
+  DotsThreeCircle,
   PauseCircle,
   PlayCircle,
 } from '@phosphor-icons/react';
@@ -7,8 +8,8 @@ import { shallow } from 'zustand/shallow';
 import { useStore } from '../lib/store';
 
 export const Toggle = () => {
-  const [state, start, stop, reset] = useStore(
-    (s) => [s.state, s.start, s.stop, s.reset],
+  const [state, start, stop, reset, toggleSettings] = useStore(
+    (s) => [s.state, s.start, s.stop, s.reset, s.toggleSettings],
     shallow,
   );
 
@@ -27,12 +28,36 @@ export const Toggle = () => {
   return (
     <section className="text-zinc-100 cursor-pointer flex gap-2">
       {state !== 'idle' ? (
-        <PauseCircle className={iconClassName} onClick={toggle} size={52} />
+        <PauseCircle
+          className={iconClassName}
+          weight="thin"
+          onClick={toggle}
+          size={52}
+        />
       ) : (
-        <PlayCircle className={iconClassName} onClick={toggle} size={52} />
+        <PlayCircle
+          className={iconClassName}
+          weight="thin"
+          onClick={toggle}
+          size={52}
+        />
       )}
       {state === 'idle' && (
-        <ArrowCircleLeft className={iconClassName} onClick={reset} size={52} />
+        <>
+          <ArrowCircleLeft
+            className={iconClassName}
+            onClick={reset}
+            weight="thin"
+            size={52}
+          />
+
+          <DotsThreeCircle
+            className={iconClassName}
+            onClick={toggleSettings}
+            weight="thin"
+            size={52}
+          />
+        </>
       )}
     </section>
   );
