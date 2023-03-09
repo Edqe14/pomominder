@@ -4,8 +4,6 @@ import { combine } from 'zustand/middleware';
 export type Mode = 'work' | 'shortBreak' | 'longBreak';
 export type State = 'idle' | 'running';
 
-// Parse local storage
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const numberOrDefault = (val: any, def: number) => {
   // eslint-disable-next-line no-restricted-globals
@@ -13,7 +11,7 @@ const numberOrDefault = (val: any, def: number) => {
     return def;
   }
 
-  return parseInt(val, 10);
+  return Number(val);
 };
 
 const booleanOrDefault = (val: string | undefined | null, def: boolean) => {
@@ -26,6 +24,15 @@ const booleanOrDefault = (val: string | undefined | null, def: boolean) => {
   return parsed;
 };
 
+const getAudio = (url: string, volume = 1) => {
+  const audio = new Audio(url);
+
+  audio.volume = volume;
+
+  return audio;
+};
+
+// Parse Local Storage
 const workDuration = numberOrDefault(localStorage.workDuration, 25 * 60);
 const shortBreakDuration = numberOrDefault(
   localStorage.shortBreakDuration,
@@ -36,7 +43,7 @@ const longBreakDuration = numberOrDefault(
   15 * 60,
 );
 const longBreakInterval = numberOrDefault(localStorage.longBreakInterval, 4);
-
+const alarmVolume = numberOrDefault(localStorage.alarmVolume, 1);
 const autoStartSession = booleanOrDefault(localStorage.autoStartSession, false);
 
 export const useStore = create(
@@ -55,6 +62,8 @@ export const useStore = create(
 
       finishedSessions: 0,
       timeLeft: workDuration,
+
+      alarmVolume,
     },
     (set, get) => ({
       toggleSettings: () => {
@@ -75,14 +84,17 @@ export const useStore = create(
       start: () => {
         if (get().interval !== null) return;
 
-        const interval = setInterval(() => {
+        const interval = setInterval(async () => {
           const {
             timeLeft,
             autoStartSession: internalStartSession,
             longBreakInterval: breakInterval,
+            alarmVolume: volume,
           } = get();
 
           if (timeLeft <= 0) {
+            getAudio('/audio/alarm.mp3', volume).play();
+
             const { mode, finishedSessions } = get();
             const data: Partial<ReturnType<typeof get>> = {
               mode: 'work',

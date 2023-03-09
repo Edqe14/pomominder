@@ -1,6 +1,6 @@
 import { shallow } from 'zustand/shallow';
-import { Clock, X } from '@phosphor-icons/react';
-import { Button, Input, Toggle } from 'react-daisyui';
+import { Clock, SpeakerHigh, X } from '@phosphor-icons/react';
+import { Button, Input, Range, Toggle } from 'react-daisyui';
 import type { ChangeEvent } from 'react';
 import { Mode, Store, useStore } from '../lib/store';
 
@@ -35,14 +35,22 @@ const handleConfigChange = <
   K extends keyof Omit<Store, 'autoStartSession' | `${Mode}Duration`>,
 >(
   key: K,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-shadow
-  test?: (value: string, key: K) => boolean,
+  options?: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-shadow
+    test?: (value: string, key: K) => boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    transform?: (value: string) => any;
+  },
 ) => {
   return (e: ChangeEvent<HTMLInputElement>) => {
-    if (test && !test(e.target.value, key)) return;
+    if (options?.test && !options.test(e.target.value, key)) return;
 
-    localStorage.setItem(key, e.target.value);
-    useStore.setState({ [key]: e.target.value });
+    const val = options?.transform
+      ? options.transform(e.target.value)
+      : e.target.value;
+
+    localStorage.setItem(key, val);
+    useStore.setState({ [key]: val });
   };
 };
 
@@ -55,6 +63,7 @@ export const SettingsModal = () => {
     longBreakDuration,
     autoStartSession,
     longBreakInterval,
+    alarmVolume,
   ] = useStore(
     (s) => [
       s.settingsOpen,
@@ -64,6 +73,7 @@ export const SettingsModal = () => {
       s.longBreakDuration,
       s.autoStartSession,
       s.longBreakInterval,
+      s.alarmVolume,
     ],
     shallow,
   );
@@ -87,7 +97,7 @@ export const SettingsModal = () => {
           />
         </section>
 
-        <section className="flex flex-col gap-2">
+        <section className="flex flex-col gap-2 mb-4">
           <div className="flex w-full component-preview items-center justify-center gap-2">
             <div className="form-control w-full min-w-[24rem] max-w-md">
               <label className="label">
@@ -160,10 +170,36 @@ export const SettingsModal = () => {
                 type="number"
                 min={1}
                 value={longBreakInterval}
-                onChange={handleConfigChange(
-                  'longBreakInterval',
-                  (v) => Number(v) >= 1,
-                )}
+                onChange={handleConfigChange('longBreakInterval', {
+                  test: (v) => Number(v) >= 1,
+                })}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="flex justify-between items-center">
+          <h2 className="flex items-center gap-3 font-bold text-lg mb-1">
+            <SpeakerHigh size={24} weight="bold" /> Sound
+          </h2>
+        </section>
+
+        <section className="flex flex-col gap-2 mb-4">
+          <div className="flex w-full component-preview items-center justify-center gap-2">
+            <div className="flex items-center justify-between gap-4 w-full max-w-md">
+              <label className="label inline-flex flex-shrink-0">
+                <span className="label-text">Alarm Volume</span>
+              </label>
+
+              <Range
+                min={0}
+                max={200}
+                value={alarmVolume * 100}
+                color="info"
+                onChange={handleConfigChange('alarmVolume', {
+                  transform: (value) => Number(value) / 100,
+                })}
+                size="xs"
               />
             </div>
           </div>
