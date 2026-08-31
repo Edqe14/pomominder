@@ -1,10 +1,7 @@
-export const formatTime = (seconds: number) => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
+const pad = (n: number) => Math.floor(n).toString().padStart(2, '0');
 
-  return `${minutes
-    .toFixed(Number(minutes % 1 !== 0))
-    .padStart(2, '0')}:${remainingSeconds
-    .toFixed(Number(remainingSeconds % 1 !== 0))
-    .padStart(2, '0')}`;
+export const formatTime = (seconds: number) => {
+  const safe = Math.max(0, Math.floor(seconds));
+
+  return `${pad(safe / 60)}:${pad(safe % 60)}`;
 };

@@ -4,23 +4,16 @@ import {
   PauseCircle,
   PlayCircle,
 } from '@phosphor-icons/react';
-import { shallow } from 'zustand/shallow';
+import { useShallow } from 'zustand/shallow';
 import { useStore } from '../lib/store';
+import { Pip } from './Pip';
 
 export const Toggle = () => {
   const [state, start, stop, reset, toggleSettings] = useStore(
-    (s) => [s.state, s.start, s.stop, s.reset, s.toggleSettings],
-    shallow,
+    useShallow((s) => [s.state, s.start, s.stop, s.reset, s.toggleSettings]),
   );
 
-  const toggle = () => {
-    const nextState = state === 'idle' ? 'running' : 'idle';
-    useStore.setState({ state: nextState });
-
-    if (nextState === 'idle') return stop();
-
-    start();
-  };
+  const toggle = () => (state === 'idle' ? start() : stop());
 
   const iconClassName =
     'opacity-50 hover:opacity-75 transition-opacity duration-200 ease-in-out';
@@ -59,6 +52,8 @@ export const Toggle = () => {
           />
         </>
       )}
+
+      <Pip />
     </section>
   );
 };
