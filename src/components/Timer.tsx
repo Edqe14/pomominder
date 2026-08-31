@@ -11,7 +11,7 @@ export const Timer = () => {
   }, [formatted]);
 
   return (
-    <h2 className="select-none text-9xl text-zinc-200 font-semibold flex-shrink-0 w-max">
+    <h2 className="select-none text-9xl text-zinc-200 font-semibold shrink-0 w-max">
       {formatted}
     </h2>
   );

@@ -1,63 +1,47 @@
-import { shallow } from 'zustand/shallow';
 import { Clock, SpeakerHigh, X } from '@phosphor-icons/react';
-import { Button, Input, Range, Toggle } from 'react-daisyui';
 import type { ChangeEvent } from 'react';
-import { Mode, Store, useStore } from '../lib/store';
+import { useShallow } from 'zustand/shallow';
+import { useStore, type Mode } from '../lib/store';
 
-const handleTimeChange = (mode: Mode) => {
-  return (e: ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value) * 60; // seconds
+const handleTimeChange =
+  (mode: Mode) => (e: ChangeEvent<HTMLInputElement>) => {
+    const minutes = Number(e.target.value);
 
-    if (value < 1) return;
+    if (!Number.isFinite(minutes) || minutes < 1) return;
 
-    const name = `${mode}Duration`;
-    const data: Partial<Store> = {
-      [name]: value,
-    };
-
-    if (useStore.getState().mode === mode) {
-      data.timeLeft = value;
-    }
-
-    localStorage.setItem(name, value.toString());
-    useStore.setState(data);
+    useStore.getState().setDuration(mode, minutes * 60);
   };
-};
 
-const handleChecked = (key: 'autoStartSession') => {
-  return (e: ChangeEvent<HTMLInputElement>) => {
-    localStorage.setItem(key, e.target.checked.toString());
-    useStore.setState({ [key]: e.target.checked });
-  };
-};
+const DurationField = ({
+  label,
+  mode,
+  value,
+}: {
+  label: string;
+  mode: Mode;
+  value: number;
+}) => (
+  <div className="form-control w-full min-w-[24rem] max-w-md">
+    <label className="label">
+      <span className="label-text">{label}</span>
+      <span className="text-xs opacity-60">In minutes</span>
+    </label>
 
-const handleConfigChange = <
-  K extends keyof Omit<Store, 'autoStartSession' | `${Mode}Duration`>,
->(
-  key: K,
-  options?: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-shadow
-    test?: (value: string, key: K) => boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    transform?: (value: string) => any;
-  },
-) => {
-  return (e: ChangeEvent<HTMLInputElement>) => {
-    if (options?.test && !options.test(e.target.value, key)) return;
-
-    const val = options?.transform
-      ? options.transform(e.target.value)
-      : e.target.value;
-
-    localStorage.setItem(key, val);
-    useStore.setState({ [key]: val });
-  };
-};
+    <input
+      className="input input-bordered w-full"
+      type="number"
+      value={value / 60}
+      min={1}
+      onChange={handleTimeChange(mode)}
+    />
+  </div>
+);
 
 export const SettingsModal = () => {
   const [
     open,
     toggleSettings,
+    updateSettings,
     workDuration,
     shortBreakDuration,
     longBreakDuration,
@@ -65,23 +49,23 @@ export const SettingsModal = () => {
     longBreakInterval,
     alarmVolume,
   ] = useStore(
-    (s) => [
+    useShallow((s) => [
       s.settingsOpen,
       s.toggleSettings,
+      s.updateSettings,
       s.workDuration,
       s.shortBreakDuration,
       s.longBreakDuration,
       s.autoStartSession,
       s.longBreakInterval,
       s.alarmVolume,
-    ],
-    shallow,
+    ]),
   );
 
   return (
     <section
       className={`absolute inset-0 grid place-items-center w-screen h-screen transition-opacity duration-200 ease-in-out ${
-        !open ? 'pointer-events-none opacity-0' : 'bg-zinc-800 bg-opacity-30'
+        !open ? 'pointer-events-none opacity-0' : 'bg-zinc-800/30'
       }`}
     >
       <section className="z-10 bg-zinc-200 text-zinc-700 p-6 rounded-xl">
@@ -98,81 +82,65 @@ export const SettingsModal = () => {
         </section>
 
         <section className="flex flex-col gap-2 mb-4">
-          <div className="flex w-full component-preview items-center justify-center gap-2">
-            <div className="form-control w-full min-w-[24rem] max-w-md">
-              <label className="label">
-                <span className="label-text">Work duration</span>
-                <span className="text-xs opacity-60">In minutes</span>
-              </label>
-
-              <Input
-                type="number"
-                value={workDuration / 60}
-                min={1}
-                onChange={handleTimeChange('work')}
-              />
-            </div>
+          <div className="flex w-full items-center justify-center gap-2">
+            <DurationField
+              label="Work duration"
+              mode="work"
+              value={workDuration}
+            />
           </div>
 
-          <div className="flex w-full component-preview items-center justify-center gap-2">
-            <div className="form-control w-full max-w-md">
-              <label className="label">
-                <span className="label-text">Short break duration</span>
-                <span className="text-xs opacity-60">In minutes</span>
-              </label>
-
-              <Input
-                type="number"
-                value={shortBreakDuration / 60}
-                min={1}
-                onChange={handleTimeChange('shortBreak')}
-              />
-            </div>
+          <div className="flex w-full items-center justify-center gap-2">
+            <DurationField
+              label="Short break duration"
+              mode="shortBreak"
+              value={shortBreakDuration}
+            />
           </div>
 
-          <div className="flex w-full component-preview items-center justify-center gap-2">
-            <div className="form-control w-full max-w-md">
-              <label className="label">
-                <span className="label-text">Long break duration</span>
-                <span className="text-xs opacity-60">In minutes</span>
-              </label>
-
-              <Input
-                type="number"
-                value={longBreakDuration / 60}
-                min={1}
-                onChange={handleTimeChange('longBreak')}
-              />
-            </div>
+          <div className="flex w-full items-center justify-center gap-2">
+            <DurationField
+              label="Long break duration"
+              mode="longBreak"
+              value={longBreakDuration}
+            />
           </div>
 
-          <div className="flex w-full component-preview items-center justify-center gap-2">
+          <div className="flex w-full items-center justify-center gap-2">
             <div className="flex items-center justify-between gap-4 w-full max-w-md">
               <label className="label inline-flex">
                 <span className="label-text">Auto start sessions</span>
               </label>
 
-              <Toggle
-                color="info"
+              <input
+                className="toggle toggle-info"
+                type="checkbox"
                 checked={autoStartSession}
-                onChange={handleChecked('autoStartSession')}
+                onChange={(e) =>
+                  updateSettings({ autoStartSession: e.target.checked })
+                }
               />
             </div>
           </div>
 
-          <div className="flex w-full component-preview items-center justify-center gap-2">
+          <div className="flex w-full items-center justify-center gap-2">
             <div className="flex items-center justify-between gap-4 w-full max-w-md">
               <label className="label inline-flex">
                 <span className="label-text">Long break interval</span>
               </label>
 
-              <Input
+              <input
+                className="input input-bordered"
                 type="number"
                 min={1}
                 value={longBreakInterval}
-                onChange={handleConfigChange('longBreakInterval', {
-                  test: (v) => Number(v) >= 1,
-                })}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+
+                  if (!Number.isInteger(value) || value < 1) return;
+
+                  updateSettings({ longBreakInterval: value });
+                }}
               />
             </div>
           </div>
@@ -185,34 +153,33 @@ export const SettingsModal = () => {
         </section>
 
         <section className="flex flex-col gap-2 mb-4">
-          <div className="flex w-full component-preview items-center justify-center gap-2">
+          <div className="flex w-full items-center justify-center gap-2">
             <div className="flex items-center justify-between gap-4 w-full max-w-md">
-              <label className="label inline-flex flex-shrink-0">
+              <label className="label inline-flex shrink-0">
                 <span className="label-text">Alarm Volume</span>
               </label>
 
-              <Range
+              <input
+                className="range range-info range-xs"
+                type="range"
                 min={0}
-                max={200}
+                max={100}
                 value={alarmVolume * 100}
-                color="info"
-                onChange={handleConfigChange('alarmVolume', {
-                  transform: (value) => Number(value) / 100,
-                })}
-                size="xs"
+                onChange={(e) =>
+                  updateSettings({ alarmVolume: Number(e.target.value) / 100 })
+                }
               />
             </div>
           </div>
         </section>
 
-        <Button
-          color="success"
-          className="mt-6"
-          fullWidth
+        <button
+          type="button"
+          className="btn btn-success w-full mt-6"
           onClick={toggleSettings}
         >
           Ok
-        </Button>
+        </button>
       </section>
 
       <span className="absolute inset-0 block" onClick={toggleSettings} />

@@ -1,5 +1,6 @@
 ---
-import "@fontsource/inter";
+import '@fontsource/inter';
+import '../styles/global.css';
 
 export interface Props {
 	title: string;
@@ -16,22 +17,21 @@ const { title } = Astro.props;
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
 
-		<!-- Write meta tags  -->
 		<meta name="title" content="Pomominder">
-		<meta name="description" content="Manage your productivty.">
+		<meta name="description" content="Manage your productivity.">
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website">
 		<meta property="og:url" content="https://pomominder.edqe.me/">
 		<meta property="og:title" content="Pomominder">
-		<meta property="og:description" content="Manage your productivty.">
+		<meta property="og:description" content="Manage your productivity.">
 		<meta property="og:image" content="/pomo.jpg">
 
 		<!-- Twitter -->
 		<meta property="twitter:card" content="summary_large_image">
 		<meta property="twitter:url" content="https://pomominder.edqe.me/">
 		<meta property="twitter:title" content="Pomominder">
-		<meta property="twitter:description" content="Manage your productivty.">
+		<meta property="twitter:description" content="Manage your productivity.">
 		<meta property="twitter:image" content="/pomo.jpg">
 
 		<title>{title}</title>
@@ -44,7 +44,7 @@ const { title } = Astro.props;
 </html>
 
 <script>
-import { useStore, Store } from '../lib/store';
+import { useStore, type Store } from '../lib/store';
 
 // Background updater
 const Colors = {
@@ -54,28 +54,17 @@ const Colors = {
 } as const;
 
 const main = document.querySelector('main')!;
+let current: string | undefined;
+
+// The store ticks 4x a second; only touch the DOM when the mode actually changes.
 const update = (state: Store) => {
-	const removeList = [...Object.values(Colors)];
+	const next = Colors[state.mode];
+	if (next === current) return;
 
-	switch(state.mode) {
-		case 'work':
-			removeList.splice(removeList.indexOf(Colors.work), 1);
-			main.classList.add(Colors.work);
-			break;
-
-		case 'shortBreak':
-			removeList.splice(removeList.indexOf(Colors.shortBreak), 1);
-			main.classList.add(Colors.shortBreak);
-			break;
-
-		case 'longBreak':
-			removeList.splice(removeList.indexOf(Colors.longBreak), 1);
-			main.classList.add(Colors.longBreak);
-			break;
-	}
-
-	main.classList.remove(...removeList);
-}
+	if (current) main.classList.remove(current);
+	main.classList.add(next);
+	current = next;
+};
 
 update(useStore.getState());
 useStore.subscribe(update);

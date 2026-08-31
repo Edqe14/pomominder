@@ -1,12 +1,10 @@
-import { shallow } from 'zustand/shallow';
+import { useShallow } from 'zustand/shallow';
 import { useStore } from '../lib/store';
 import { Button } from './Button';
 
 export const ModeSelector = () => {
   const [mode, setMode, state] = useStore(
-    // eslint-disable-next-line no-shadow
-    (s) => [s.mode, s.setMode, s.state],
-    shallow,
+    useShallow((s) => [s.mode, s.setMode, s.state]),
   );
 
   return (

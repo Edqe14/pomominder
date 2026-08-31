@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+@plugin 'daisyui';
+
+@theme {
+  --font-inter: 'Inter', sans-serif;
+
+  --color-pale-red: #923737;
+  --color-pale-teal: #2d6a6e;
+  --color-pale-blue: #2e5a79;
+}
