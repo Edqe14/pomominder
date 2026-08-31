@@ -3,14 +3,13 @@ import type { ChangeEvent } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { previewAlarm, useStore, type Mode } from '../lib/store';
 
-const handleTimeChange =
-  (mode: Mode) => (e: ChangeEvent<HTMLInputElement>) => {
-    const minutes = Number(e.target.value);
+const handleTimeChange = (mode: Mode) => (e: ChangeEvent<HTMLInputElement>) => {
+  const minutes = Number(e.target.value);
 
-    if (!Number.isFinite(minutes) || minutes < 1) return;
+  if (!Number.isFinite(minutes) || minutes < 1) return;
 
-    useStore.getState().setDuration(mode, minutes * 60);
-  };
+  useStore.getState().setDuration(mode, minutes * 60);
+};
 
 const DurationField = ({
   label,
@@ -21,14 +20,18 @@ const DurationField = ({
   mode: Mode;
   value: number;
 }) => (
-  <div className="form-control w-full min-w-[24rem] max-w-md">
-    <label className="label">
-      <span className="label-text">{label}</span>
+  <div className="w-full min-w-[24rem] max-w-md">
+    <label
+      className="flex items-center justify-between pb-1 text-sm"
+      htmlFor={`${mode}Duration`}
+    >
+      <span>{label}</span>
       <span className="text-xs opacity-60">In minutes</span>
     </label>
 
     <input
-      className="input input-bordered w-full"
+      id={`${mode}Duration`}
+      className="input w-full"
       type="number"
       value={value / 60}
       min={1}
@@ -108,11 +111,12 @@ export const SettingsModal = () => {
 
           <div className="flex w-full items-center justify-center gap-2">
             <div className="flex items-center justify-between gap-4 w-full max-w-md">
-              <label className="label inline-flex">
-                <span className="label-text">Auto start sessions</span>
+              <label className="text-sm" htmlFor="autoStartSession">
+                Auto start sessions
               </label>
 
               <input
+                id="autoStartSession"
                 className="toggle toggle-info"
                 type="checkbox"
                 checked={autoStartSession}
@@ -125,12 +129,13 @@ export const SettingsModal = () => {
 
           <div className="flex w-full items-center justify-center gap-2">
             <div className="flex items-center justify-between gap-4 w-full max-w-md">
-              <label className="label inline-flex">
-                <span className="label-text">Long break interval</span>
+              <label className="text-sm" htmlFor="longBreakInterval">
+                Long break interval
               </label>
 
               <input
-                className="input input-bordered"
+                id="longBreakInterval"
+                className="input"
                 type="number"
                 min={1}
                 value={longBreakInterval}
@@ -155,11 +160,12 @@ export const SettingsModal = () => {
         <section className="flex flex-col gap-2 mb-4">
           <div className="flex w-full items-center justify-center gap-2">
             <div className="flex items-center justify-between gap-4 w-full max-w-md">
-              <label className="label inline-flex shrink-0">
-                <span className="label-text">Alarm Volume</span>
+              <label className="shrink-0 text-sm" htmlFor="alarmVolume">
+                Alarm Volume
               </label>
 
               <input
+                id="alarmVolume"
                 className="range range-info range-xs"
                 type="range"
                 min={0}

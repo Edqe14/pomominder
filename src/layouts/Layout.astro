@@ -54,7 +54,11 @@ const Colors = {
 } as const;
 
 const main = document.querySelector('main')!;
-let current: string | undefined;
+// Seeded from the markup, so the class it ships with is removed rather than
+// stacked on top of when the mode differs.
+let current = Object.values(Colors).find((c) => main.classList.contains(c)) as
+	| string
+	| undefined;
 
 // The store ticks 4x a second; only touch the DOM when the mode actually changes.
 const update = (state: Store) => {

@@ -45,9 +45,22 @@ export const Pip = () => {
   // client render; the button appears right after hydration.
   useEffect(() => setSupported('documentPictureInPicture' in window), []);
 
+  // Closing the window and dropping the listener are the same teardown whether
+  // the user toggled it off or the island unmounted with it still open.
+  useEffect(() => {
+    if (!pipWindow) return;
+
+    const drop = () => setPipWindow(null);
+    pipWindow.addEventListener('pagehide', drop);
+
+    return () => {
+      pipWindow.removeEventListener('pagehide', drop);
+      pipWindow.close();
+    };
+  }, [pipWindow]);
+
   const toggle = async () => {
     if (pipWindow) {
-      pipWindow.close();
       setPipWindow(null);
       return;
     }
@@ -59,7 +72,6 @@ export const Pip = () => {
       });
 
       w.document.body.style.margin = '0';
-      w.addEventListener('pagehide', () => setPipWindow(null));
 
       setPipWindow(w);
     } catch {
