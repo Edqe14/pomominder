@@ -25,17 +25,30 @@ const DEFAULTS: Settings = {
 // Reused across sessions so the alarm is preloaded when it has to fire.
 let alarm: HTMLAudioElement | undefined;
 
+// HTMLMediaElement.volume throws IndexSizeError outside 0..1.
+const clamp = (volume: number) => Math.min(1, Math.max(0, volume));
+
 const playAlarm = (volume: number) => {
   if (typeof Audio === 'undefined') return;
 
   alarm ??= new Audio('/audio/alarm.mp3');
 
-  // HTMLMediaElement.volume throws IndexSizeError outside 0..1.
-  alarm.volume = Math.min(1, Math.max(0, volume));
+  alarm.volume = clamp(volume);
   alarm.currentTime = 0;
 
   // Blocked autoplay rejects; a missed alarm should not break the timer.
   alarm.play().catch(() => {});
+};
+
+// Volume preview. Retunes the running alarm instead of restarting it, so
+// dragging the slider stays one continuous sound.
+export const previewAlarm = (volume: number) => {
+  if (alarm && !alarm.paused) {
+    alarm.volume = clamp(volume);
+    return;
+  }
+
+  playAlarm(volume);
 };
 
 const TICK_MS = 250;

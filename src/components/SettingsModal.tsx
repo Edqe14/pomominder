@@ -1,7 +1,7 @@
 import { Clock, SpeakerHigh, X } from '@phosphor-icons/react';
 import type { ChangeEvent } from 'react';
 import { useShallow } from 'zustand/shallow';
-import { useStore, type Mode } from '../lib/store';
+import { previewAlarm, useStore, type Mode } from '../lib/store';
 
 const handleTimeChange =
   (mode: Mode) => (e: ChangeEvent<HTMLInputElement>) => {
@@ -165,9 +165,12 @@ export const SettingsModal = () => {
                 min={0}
                 max={100}
                 value={alarmVolume * 100}
-                onChange={(e) =>
-                  updateSettings({ alarmVolume: Number(e.target.value) / 100 })
-                }
+                onChange={(e) => {
+                  const volume = Number(e.target.value) / 100;
+
+                  updateSettings({ alarmVolume: volume });
+                  previewAlarm(volume);
+                }}
               />
             </div>
           </div>
