@@ -6,6 +6,7 @@ import {
 } from '@phosphor-icons/react';
 import { useShallow } from 'zustand/shallow';
 import { useStore } from '../lib/store';
+import { Pip } from './Pip';
 
 export const Toggle = () => {
   const [state, start, stop, reset, toggleSettings] = useStore(
@@ -51,6 +52,8 @@ export const Toggle = () => {
           />
         </>
       )}
+
+      <Pip />
     </section>
   );
 };
